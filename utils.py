@@ -8,10 +8,7 @@ def lookup_pixel_color(pixel_value, pixel_colors):
     """
     return pixel_colors.get(pixel_value, (255, 255, 255))  # Default color: White (RGB: 255, 255, 255)
 
-def generate_pixel_art_image(json_file, output_image_path, pixel_colors):
-    with open(json_file, 'r') as file:
-        data = json.load(file)
-
+def validate_json_for_pixel(data):
     if "width" not in data or "height" not in data or "pixels" not in data:
         raise ValueError("Invalid JSON format. Make sure 'width', 'height', and 'pixels' are present.")
 
@@ -21,6 +18,16 @@ def generate_pixel_art_image(json_file, output_image_path, pixel_colors):
 
     if len(pixels) != height or any(len(row) != width for row in pixels):
         raise ValueError(f"Pixel data does not match specified width ({width}) and height ({height}).")
+
+def generate_pixel_art_image(json_file, output_image_path, pixel_colors):
+    with open(json_file, 'r') as file:
+        data = json.load(file)
+
+    validate_json_for_pixel(data)
+
+    width = data["width"]
+    height = data["height"]
+    pixels = data["pixels"]
 
     pixel_size = 10  # Adjust this value to set the size of each pixel in the output image
     image_width = width * pixel_size
@@ -49,15 +56,9 @@ def modify_pixel_art(json_file, modified_json_file, pixel_modifications):
     with open(json_file, 'r') as file:
         data = json.load(file)
 
-    if "width" not in data or "height" not in data or "pixels" not in data:
-        raise ValueError("Invalid JSON format. Make sure 'width', 'height', and 'pixels' are present.")
+    validate_json_for_pixel(data)
 
-    width = data["width"]
-    height = data["height"]
     pixels = data["pixels"]
-
-    if len(pixels) != height or any(len(row) != width for row in pixels):
-        raise ValueError(f"Pixel data does not match specified width ({width}) and height ({height}).")
 
     for y, row in enumerate(pixels):
         for x, pixel_value in enumerate(row):
@@ -66,4 +67,3 @@ def modify_pixel_art(json_file, modified_json_file, pixel_modifications):
 
     with open(modified_json_file, 'w') as modified_file:
         json.dump(data, modified_file)
-        
